@@ -1,0 +1,242 @@
+import tkinter as tk
+from tkinter import messagebox
+
+# Clase para representar a los pacientes
+class Paciente:
+    def __init__(self, nombre, especie, raza, edad, propietario):
+        self.nombre = nombre
+        self.especie = especie
+        self.raza = raza
+        self.edad = edad
+        self.propietario = propietario
+        self.historial_medico = []
+
+    def actualizar_informacion(self, nombre=None, especie=None, raza=None, edad=None, propietario=None):
+        if nombre: self.nombre = nombre
+        if especie: self.especie = especie
+        if raza: self.raza = raza
+        if edad: self.edad = edad
+        if propietario: self.propietario = propietario
+
+    def agregar_historial(self, detalle):
+        self.historial_medico.append(detalle)
+
+# Clase para representar a los propietarios
+class Propietario:
+    def __init__(self, nombre, direccion, telefono):
+        self.nombre = nombre
+        self.direccion = direccion
+        self.telefono = telefono
+
+# Clase para representar las citas
+class Cita:
+    def __init__(self, paciente, fecha, hora, motivo):
+        self.paciente = paciente
+        self.fecha = fecha
+        self.hora = hora
+        self.motivo = motivo
+        self.detalles_consulta = []
+
+    def agregar_detalles_consulta(self, diagnostico, tratamiento, medicamentos):
+        self.detalles_consulta.append({
+            "diagnostico": diagnostico,
+            "tratamiento": tratamiento,
+            "medicamentos": medicamentos
+        })
+
+# Clase para representar los medicamentos
+class Medicamento:
+    def __init__(self, nombre, cantidad, precio):
+        self.nombre = nombre
+        self.cantidad = cantidad
+        self.precio = precio
+
+    def actualizar_existencias(self, cantidad):
+        self.cantidad = cantidad
+
+    def actualizar_precio(self, precio):
+        self.precio = precio
+
+# Clase para la GUI y gestión del sistema
+class ClinicaVeterinaria:
+    def __init__(self, root):
+        self.root = root
+        self.root.title("Sistema de Gestión de Clínica Veterinaria")
+
+        # Base de datos ficticia
+        self.pacientes = []
+        self.propietarios = []
+        self.citas = []
+        self.medicamentos = []
+
+        # Interfaz gráfica
+        self.frame = tk.Frame(root)
+        self.frame.pack()
+
+        self.label = tk.Label(self.frame, text="Sistema de Gestión de Clínica Veterinaria")
+        self.label.pack()
+
+        self.btn_nuevo_paciente = tk.Button(self.frame, text="Registrar Nuevo Paciente", command=self.registrar_paciente)
+        self.btn_nuevo_paciente.pack()
+
+        self.btn_ver_pacientes = tk.Button(self.frame, text="Ver Pacientes", command=self.ver_pacientes)
+        self.btn_ver_pacientes.pack()
+
+        self.btn_programar_cita = tk.Button(self.frame, text="Programar Cita", command=self.programar_cita)
+        self.btn_programar_cita.pack()
+
+        self.btn_gestionar_medicamentos = tk.Button(self.frame, text="Gestionar Medicamentos", command=self.gestionar_medicamentos)
+        self.btn_gestionar_medicamentos.pack()
+
+    def registrar_paciente(self):
+        ventana = tk.Toplevel(self.root)
+        ventana.title("Registrar Nuevo Paciente")
+
+        tk.Label(ventana, text="Nombre:").pack()
+        nombre_entry = tk.Entry(ventana)
+        nombre_entry.pack()
+
+        tk.Label(ventana, text="Especie:").pack()
+        especie_entry = tk.Entry(ventana)
+        especie_entry.pack()
+
+        tk.Label(ventana, text="Raza:").pack()
+        raza_entry = tk.Entry(ventana)
+        raza_entry.pack()
+
+        tk.Label(ventana, text="Edad:").pack()
+        edad_entry = tk.Entry(ventana)
+        edad_entry.pack()
+
+        tk.Label(ventana, text="Propietario:").pack()
+        propietario_entry = tk.Entry(ventana)
+        propietario_entry.pack()
+
+        def guardar_paciente():
+            nombre = nombre_entry.get()
+            especie = especie_entry.get()
+            raza = raza_entry.get()
+            edad = edad_entry.get()
+            propietario = propietario_entry.get()
+            
+            nuevo_paciente = Paciente(nombre, especie, raza, edad, propietario)
+            self.pacientes.append(nuevo_paciente)
+            
+            messagebox.showinfo("Registro Exitoso", "Paciente registrado correctamente")
+            ventana.destroy()
+
+        tk.Button(ventana, text="Guardar", command=guardar_paciente).pack()
+
+    def ver_pacientes(self):
+        ventana = tk.Toplevel(self.root)
+        ventana.title("Listado de Pacientes")
+
+        for paciente in self.pacientes:
+            paciente_frame = tk.Frame(ventana)
+            paciente_frame.pack(pady=5)
+
+            tk.Label(paciente_frame, text=f"Nombre: {paciente.nombre}, Especie: {paciente.especie}, Raza: {paciente.raza}, Edad: {paciente.edad}, Propietario: {paciente.propietario}").pack()
+
+            ver_historial_btn = tk.Button(paciente_frame, text="Ver Historial Médico", command=lambda p=paciente: self.ver_historial_medico(p))
+            ver_historial_btn.pack()
+
+            agregar_historial_btn = tk.Button(paciente_frame, text="Agregar Historial Médico", command=lambda p=paciente: self.agregar_historial_medico(p))
+            agregar_historial_btn.pack()
+
+    def ver_historial_medico(self, paciente):
+        ventana_historial = tk.Toplevel(self.root)
+        ventana_historial.title(f"Historial Médico de {paciente.nombre}")
+
+        if paciente.historial_medico:
+            for entry in paciente.historial_medico:
+                tk.Label(ventana_historial, text=entry).pack()
+        else:
+            tk.Label(ventana_historial, text="No hay historial médico disponible.").pack()
+
+    def agregar_historial_medico(self, paciente):
+        ventana_historial = tk.Toplevel(self.root)
+        ventana_historial.title(f"Agregar Historial Médico a {paciente.nombre}")
+
+        tk.Label(ventana_historial, text="Detalle:").pack()
+        detalle_entry = tk.Entry(ventana_historial)
+        detalle_entry.pack()
+
+        def guardar_historial():
+            detalle = detalle_entry.get()
+            paciente.agregar_historial(detalle)
+            messagebox.showinfo("Historial Agregado", "Historial médico agregado correctamente")
+            ventana_historial.destroy()
+
+        tk.Button(ventana_historial, text="Guardar", command=guardar_historial).pack()
+
+    def programar_cita(self):
+        ventana = tk.Toplevel(self.root)
+        ventana.title("Programar Nueva Cita")
+
+        tk.Label(ventana, text="Paciente:").pack()
+        paciente_entry = tk.Entry(ventana)
+        paciente_entry.pack()
+
+        tk.Label(ventana, text="Fecha:").pack()
+        fecha_entry = tk.Entry(ventana)
+        fecha_entry.pack()
+
+        tk.Label(ventana, text="Hora:").pack()
+        hora_entry = tk.Entry(ventana)
+        hora_entry.pack()
+
+        tk.Label(ventana, text="Motivo:").pack()
+        motivo_entry = tk.Entry(ventana)
+        motivo_entry.pack()
+
+        def guardar_cita():
+            paciente_nombre = paciente_entry.get()
+            fecha = fecha_entry.get()
+            hora = hora_entry.get()
+            motivo = motivo_entry.get()
+
+            for paciente in self.pacientes:
+                if paciente.nombre == paciente_nombre:
+                    nueva_cita = Cita(paciente, fecha, hora, motivo)
+                    self.citas.append(nueva_cita)
+                    messagebox.showinfo("Cita Programada", "Cita programada correctamente")
+                    ventana.destroy()
+                    return
+            
+            messagebox.showerror("Error", "Paciente no encontrado")
+
+        tk.Button(ventana, text="Guardar", command=guardar_cita).pack()
+
+    def gestionar_medicamentos(self):
+        ventana = tk.Toplevel(self.root)
+        ventana.title("Gestión de Medicamentos")
+
+        tk.Label(ventana, text="Nombre:").pack()
+        nombre_entry = tk.Entry(ventana)
+        nombre_entry.pack()
+
+        tk.Label(ventana, text="Cantidad:").pack()
+        cantidad_entry = tk.Entry(ventana)
+        cantidad_entry.pack()
+
+        tk.Label(ventana, text="Precio:").pack()
+        precio_entry = tk.Entry(ventana)
+        precio_entry.pack()
+
+        def guardar_medicamento():
+            nombre = nombre_entry.get()
+            cantidad = cantidad_entry.get()
+            precio = precio_entry.get()
+
+            nuevo_medicamento = Medicamento(nombre, cantidad, precio)
+            self.medicamentos.append(nuevo_medicamento)
+            messagebox.showinfo("Medicamento Registrado", "Medicamento registrado correctamente")
+            ventana.destroy()
+
+        tk.Button(ventana, text="Guardar", command=guardar_medicamento).pack()
+
+# Inicialización de la aplicación
+if __name__ == "__main__":
+    root = tk.Tk()
+    app = ClinicaVeterinaria(root)
+    root.mainloop()
